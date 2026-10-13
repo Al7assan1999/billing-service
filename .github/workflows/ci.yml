@@ -1,0 +1,33 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Unit + SQL Server integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test (integration tests start SQL Server with Testcontainers)
+        env:
+          RUN_DOCKER_TESTS: "true"
+        run: dotnet test --configuration Release --logger "console;verbosity=normal"
+
+  compose:
+    name: Docker Compose smoke test
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build --wait --wait-timeout 300
+      - name: API is up and talks to SQL Server
+        run: |
+          for i in $(seq 1 30); do curl -sf http://localhost:5200/health && break; sleep 2; done
+          curl -sf -X POST http://localhost:5200/api/plans -H 'Content-Type: application/json' -d '{"name":"Basic","monthlyPrice":99,"currency":"SAR"}'
+          curl -sf http://localhost:5200/api/dashboard
+      - name: Logs
+        if: failure()
+        run: docker compose logs --tail 150
