@@ -4,6 +4,8 @@
 
 A subscription billing API in **ASP.NET Core (.NET 10)** with **EF Core** on **SQL Server**: customers subscribe to monthly plans, invoices are issued automatically with VAT, upgrades are prorated to the day, payments are tracked, and invoices render as PDF.
 
+An Angular admin UI for this API lives in [billing-admin-dashboard](https://github.com/Al7assan1999/billing-admin-dashboard).
+
 Structured with **Clean Architecture** and a rich **domain model**; tested with unit tests on the domain and integration tests against a real SQL Server container.
 
 ## Features
